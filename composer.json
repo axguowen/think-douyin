@@ -1,0 +1,33 @@
+{
+    "name": "axguowen/think-douyin",
+    "description": "Simple Douyin Development Kit For ThinkPHP",
+    "keywords": [
+        "thinkphp",
+        "douyin",
+        "sdk"
+    ],
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "axguowen",
+            "email": "axguowen@qq.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.2.5",
+        "topthink/framework": "^6.1||^8.0",
+        "axguowen/http-client": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "think\\": "src"
+        }
+    },
+    "extra": {
+        "think": {
+            "config": {
+                "douyin": "src/douyin/config.php"
+            }
+        }
+    }
+}
