@@ -225,11 +225,11 @@ class Tools
      * SPI签名生成
      * @access public
      * @param string $clientSecret
-     * @param array $httpQuery
      * @param string $httpBody
+     * @param array $httpQuery
      * @return string
      */
-    public static function spiSign($clientSecret, array $httpQuery = [], $httpBody = '')
+    public static function spiSign($clientSecret, $httpBody = '', array $httpQuery = [])
     {
         // 签名字符串
         $signStr = $clientSecret;
