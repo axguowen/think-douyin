@@ -23,5 +23,18 @@ return [
             // 应用密钥
             'client_secret' => '',
         ],
+        // 网站应用
+        'website' => [
+            // 驱动类型
+            'type' => 'Website',
+            // 应用ID
+            'client_key' => '',
+            // 应用密钥
+            'client_secret' => '',
+            // oauth授权Token
+            'oauth_access_token' => '',
+            // oauth刷新Token
+            'oauth_refresh_token' => '',
+        ],
     ],
 ];

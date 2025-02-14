@@ -31,7 +31,9 @@ class UserInfo extends Service
     public function getBusinessStatus($openid = '', $douyinShortId = '', array $roleLabels = ['AUTH_COMPANY'])
     {
         // 请求体
-        $data = ['role_labels' => $roleLabels];
+        $data = [
+            'role_labels' => $roleLabels
+        ];
         // 如果传了openid，则使用openid
         if (!empty($openid)) {
             $data['openid'] = $openid;
@@ -85,11 +87,12 @@ class UserInfo extends Service
     /**
      * 获取access_code
      * @access public
-     * @param string $accessToken 网页授权接口调用凭证
      * @return array
      */
-    public function getAccessCode($accessToken)
+    public function getAccessCode()
     {
+        // oauth凭证
+        $accessToken = $this->handler->getConfig('oauth_access_token');
         // 请求体
         $data = [
             'access_token' => $accessToken,

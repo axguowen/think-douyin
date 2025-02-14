@@ -69,12 +69,13 @@ class Oauth extends Service
     /**
      * 刷新refresh_token
      * @access public
-     * @param string $refreshToken
      * @return array
      */
-    public function renewRefreshToken($refreshToken)
+    public function renewRefreshToken()
     {
         $clientKey = $this->handler->getConfig('client_key');
+        // 刷新凭证
+        $refreshToken = $this->handler->getConfig('oauth_refresh_token');
         // 请求体
         $data = [
             'client_key' => $clientKey,
@@ -94,12 +95,13 @@ class Oauth extends Service
     /**
      * 刷新AccessToken并续期
      * @access public
-     * @param string $refreshToken
      * @return array
      */
-    public function refreshAccessToken($refreshToken)
+    public function refreshAccessToken()
     {
         $clientKey = $this->handler->getConfig('client_key');
+        // 刷新凭证
+        $refreshToken = $this->handler->getConfig('oauth_refresh_token');
         // 请求体
         $data = [
             'client_key' => $clientKey,
@@ -120,13 +122,13 @@ class Oauth extends Service
     /**
      * 拉取用户信息(需scope为user_info)
      * @access public
-     * @param string $accessToken 网页授权接口调用凭证,注意：此access_token与基础支持的access_token不同
      * @param string $openId 用户的唯一标识
      * @return array
      */
-    public function getUserInfo($accessToken, $openId)
+    public function getUserInfo($openId)
     {
-        $clientKey = $this->handler->getConfig('client_key');
+        // oauth凭证
+        $accessToken = $this->handler->getConfig('oauth_access_token');
         // 请求体
         $data = [
             'access_token' => $accessToken,
@@ -141,32 +143,5 @@ class Oauth extends Service
         $response = HttpClient::post($requestUrl, $data, $header)->body;
         // 返回结果
         return $this->handler->parseResponseData($response);
-    }
-
-    /**
-     * 通过Code获取已授权用户的信息
-     * @param string $code code参数
-     * @return string
-     */
-    public function getUserInfoByCode($code)
-    {
-        // 通过 code 获取 AccessToken 和 openid
-        $getAccessTokenResult = $this->getAccessToken($code);
-        // 失败
-        if(is_null($getAccessTokenResult[0])){
-            return $getAccessTokenResult;
-        }
-        // 获取accesstoken信息
-        $accessInfo = $getAccessTokenResult[0];
-        // 根据AccessToken获取微信用户信息
-        $getUserInfoResult = $this->getUserInfo($accessInfo['access_token'], $accessInfo['openid']);
-        // 失败
-        if(is_null($getUserInfoResult[0])){
-            return $getUserInfoResult;
-        }
-        // 获取用户信息数据
-        $userInfo = $getUserInfoResult[0];
-        // 返回
-        return [['access_info' => $accessInfo, 'user_info' => $userInfo], null];
     }
 }

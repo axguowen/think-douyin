@@ -28,6 +28,10 @@ class Website extends Base
         'client_key' => '',
         // 应用密钥
         'client_secret' => '',
+        // oauth授权Token
+        'oauth_access_token' => '',
+        // oauth刷新Token
+        'oauth_refresh_token' => '',
     ];
 
     /**

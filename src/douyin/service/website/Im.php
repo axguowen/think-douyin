@@ -23,7 +23,6 @@ class Im extends Service
     /**
      * 回复私信
      * @access public
-     * @param string $accessToken
      * @param string $openId 用户的唯一标识
      * @param string $msgId
      * @param string $conversationId
@@ -31,8 +30,10 @@ class Im extends Service
      * @param array $content
      * @return array
      */
-    public function replyMsg($accessToken, $openId, $msgId, $conversationId, $toUserId, array $content)
+    public function replyMsg($openId, $msgId, $conversationId, $toUserId, array $content)
     {
+        // oauth凭证
+        $accessToken = $this->handler->getConfig('oauth_access_token');
         // 请求体
         $data = Tools::arr2json([
             'msg_id' => $msgId,
@@ -55,7 +56,6 @@ class Im extends Service
     /**
      * 撤回私信
      * @access public
-     * @param string $accessToken
      * @param string $openId 用户的唯一标识
      * @param string $msgId
      * @param string $conversationId
@@ -63,8 +63,10 @@ class Im extends Service
      * @param array $content
      * @return array
      */
-    public function recallMsg($accessToken, $openId, $msgId, $conversationId, $conversationType)
+    public function recallMsg($openId, $msgId, $conversationId, $conversationType)
     {
+        // oauth凭证
+        $accessToken = $this->handler->getConfig('oauth_access_token');
         // 请求体
         $data = Tools::arr2json([
             'msg_id' => $msgId,
