@@ -17,7 +17,7 @@ use axguowen\HttpClient;
 /**
  * 移动/网站应用平台
  */
-class Website extends Base
+class Mobileweb extends Base
 {
 	/**
      * 平台配置参数
@@ -38,7 +38,7 @@ class Website extends Base
      * 服务的命名空间
      * @var string
      */
-    protected $serviceNamespace = '\\think\\douyin\\service\\website\\';
+    protected $serviceNamespace = '\\think\\douyin\\service\\mobileweb\\';
 
     /**
      * 获取接口调用凭证缓存键名
@@ -47,7 +47,7 @@ class Website extends Base
      */
     protected function getAccessCacheKey()
     {
-        return 'douyin_website_access_token_' . $this->options['client_key'];
+        return 'douyin_mobileweb_access_token_' . $this->options['client_key'];
     }
 
     /**

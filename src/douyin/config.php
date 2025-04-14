@@ -23,10 +23,10 @@ return [
             // 应用密钥
             'client_secret' => '',
         ],
-        // 网站应用
-        'website' => [
+        // 移动网站应用
+        'mobileweb' => [
             // 驱动类型
-            'type' => 'Website',
+            'type' => 'Mobileweb',
             // 应用ID
             'client_key' => '',
             // 应用密钥

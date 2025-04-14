@@ -9,7 +9,7 @@
 // | Author: axguowen <axguowen@qq.com>
 // +----------------------------------------------------------------------
 
-namespace think\douyin\service\website;
+namespace think\douyin\service\mobileweb;
 
 use think\douyin\Service;
 use think\douyin\utils\Tools;
