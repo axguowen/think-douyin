@@ -427,7 +427,7 @@ abstract class Base implements HandlerInterface
      * @access protected
      * @return string
      */
-    abstract protected function getClientCacheKey();
+    abstract protected function getClientTokenCacheKey();
 
     /**
      * 强制重新获取接口调用凭证
