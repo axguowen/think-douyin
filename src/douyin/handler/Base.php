@@ -39,31 +39,32 @@ abstract class Base implements HandlerInterface
      * 接口调用凭证
      * @var string
      */
-    protected $accessToken = '';
+    protected $clientToken = '';
 
     /**
      * 接口调用凭证缓存获取器
      * @var string|array
      */
-    protected $accessTokenGetter = [Cache::class, 'get'];
+    protected $clientTokenGetter = [Cache::class, 'get'];
 
     /**
      * 接口调用凭证缓存修改器
      * @var string|array
      */
-    protected $accessTokenSetter = [Cache::class, 'set'];
+    protected $clientTokenSetter = [Cache::class, 'set'];
 
     /**
      * 接口调用凭证是否无效
      * @var bool
      */
-    protected $accessTokenInvalid = false;
+    protected $clientTokenInvalid = false;
 
     /**
      * 调用接口返回凭证无效的错误码
      * @var array
      */
-    protected $accessTokenInvalidCode = [
+    protected $clientTokenInvalidCode = [
+        '28001008',
         '2190002',
         '2190008',
     ];
@@ -133,14 +134,14 @@ abstract class Base implements HandlerInterface
         // 初始化缓存器
         $this->initCacheHandler();
         // 如果配置了接口调用凭证
-        if (isset($this->options['access_token']) && !empty($this->options['access_token'])) {
+        if (isset($this->options['client_token']) && !empty($this->options['client_token'])) {
             // 设置接口调用凭证
-            $this->accessToken = $this->options['access_token'];
+            $this->clientToken = $this->options['client_token'];
         }
         // 如果配置了接口调用凭证错误码
-        if (isset($this->options['access_token_invalid_code']) && !empty($this->options['access_token_invalid_code'])) {
+        if (isset($this->options['client_token_invalid_code']) && !empty($this->options['client_token_invalid_code'])) {
             // 设置接口调用凭证错误码
-            $this->accessTokenInvalidCode = $this->options['access_token_invalid_code'];
+            $this->clientTokenInvalidCode = $this->options['client_token_invalid_code'];
         }
     }
 
@@ -152,19 +153,19 @@ abstract class Base implements HandlerInterface
     protected function initCacheHandler()
     {
         // 设置默认接口调用凭证缓存获取器
-        $this->accessTokenGetter = [Cache::class, 'get'];
+        $this->clientTokenGetter = [Cache::class, 'get'];
         // 设置默认接口调用凭证缓存修改器
-        $this->accessTokenSetter = [Cache::class, 'set'];
+        $this->clientTokenSetter = [Cache::class, 'set'];
         
         // 如果配置了接口调用凭证缓存获取器
-        if (isset($this->options['access_token_getter']) && !empty($this->options['access_token_getter'])) {
+        if (isset($this->options['client_token_getter']) && !empty($this->options['client_token_getter'])) {
             // 设置接口调用凭证缓存获取器
-            $this->accessTokenGetter = $this->options['access_token_getter'];
+            $this->clientTokenGetter = $this->options['client_token_getter'];
         }
         // 如果配置了接口调用凭证缓存修改器
-        if (isset($this->options['access_token_setter']) && !empty($this->options['access_token_setter'])) {
+        if (isset($this->options['client_token_setter']) && !empty($this->options['client_token_setter'])) {
             // 设置接口调用凭证缓存修改器
-            $this->accessTokenSetter = $this->options['access_token_setter'];
+            $this->clientTokenSetter = $this->options['client_token_setter'];
         }
     }
 
@@ -173,28 +174,28 @@ abstract class Base implements HandlerInterface
      * @access public
      * @return array
      */
-    public function getAccessToken()
+    public function getClientToken()
     {
         // 当前已存在
-        if (!empty($this->accessToken)) {
-            return [$this->accessToken, null];
+        if (!empty($this->clientToken)) {
+            return [$this->clientToken, null];
         }
         // 从缓存获取
-        $this->accessToken = $this->getAccessTokenCache();
+        $this->clientToken = $this->getClientTokenFromCache();
         // 缓存存在
-        if (!empty($this->accessToken)) {
-            return [$this->accessToken, null];
+        if (!empty($this->clientToken)) {
+            return [$this->clientToken, null];
         }
         // 在线获取
-        $getAccessTokenResult = $this->getAccessTokenForce();
+        $getClientTokenResult = $this->getClientTokenFromOnline();
         // 失败
-        if(is_null($getAccessTokenResult[0])){
-            return $getAccessTokenResult;
+        if(is_null($getClientTokenResult[0])){
+            return $getClientTokenResult;
         }
         // 更新当前凭证
-        $this->updateAccessToken($getAccessTokenResult[0]);
+        $this->updateClientToken($getClientTokenResult[0]);
         // 返回
-        return [$this->accessToken, null];
+        return [$this->clientToken, null];
     }
 
     /**
@@ -202,16 +203,16 @@ abstract class Base implements HandlerInterface
      * @access protected
      * @return string
      */
-    protected function getAccessTokenCache()
+    protected function getClientTokenFromCache()
     {
         // 如果是接口调用凭证已经无效
-        if ($this->accessTokenInvalid) {
+        if ($this->clientTokenInvalid) {
             return null;
         }
         // 获取缓存键名
-        $cacheKey = $this->getAccessCacheKey();
+        $cacheKey = $this->getClientTokenCacheKey();
         // 返回
-        return App::invokeMethod($this->accessTokenGetter, [$cacheKey]);
+        return App::invokeMethod($this->clientTokenGetter, [$cacheKey]);
     }
 
     /**
@@ -220,12 +221,12 @@ abstract class Base implements HandlerInterface
      * @param array $data
      * @return $this
      */
-    public function updateAccessToken(array $data = [])
+    public function updateClientToken(array $data = [])
     {
         // 调用凭证
-        $accessToken = '';
-        if(!empty($data['access_token'])){
-            $accessToken = $data['access_token'];
+        $clientToken = '';
+        if(!empty($data['client_token'])){
+            $clientToken = $data['client_token'];
         }
         
         // 到期时间
@@ -235,11 +236,11 @@ abstract class Base implements HandlerInterface
             $expiresIn = $data['expires_in'];
         }
         // 获取缓存键名
-        $cacheKey = $this->getAccessCacheKey();
+        $cacheKey = $this->getClientTokenCacheKey();
         // 设置调用凭证
-        $this->accessToken = $accessToken;
+        $this->clientToken = $clientToken;
         // 调用缓存修改器方法
-        App::invokeMethod($this->accessTokenSetter, [$cacheKey, $accessToken, $expiresIn]);
+        App::invokeMethod($this->clientTokenSetter, [$cacheKey, $clientToken, $expiresIn]);
         // 返回
         return $this;
     }
@@ -249,12 +250,12 @@ abstract class Base implements HandlerInterface
      * @access protected
      * @return void
      */
-    protected function invalidAccessToken()
+    protected function invalidClientToken()
     {
         // 清空当前调用凭证
-        $this->accessToken = '';
+        $this->clientToken = '';
         // 设置无效状态
-        $this->accessTokenInvalid = true;
+        $this->clientTokenInvalid = true;
     }
 
     /**
@@ -266,15 +267,15 @@ abstract class Base implements HandlerInterface
      * @param bool $json 是否转换为JSON参数
      * @return array
      */
-    public function callGetApi($url, array $query = [], array $headers = [], $json = true)
+    public function callGetApi($url, array $query = [], array $headers = [])
     {
         // 获取接口调用凭证
-        $getAccessTokenResult = $this->getAccessToken();
+        $getClientTokenResult = $this->getClientToken();
         // 获取接口调用凭证失败
-        if(is_null($getAccessTokenResult[0])){
-            return $this->buildErrorMessage($getAccessTokenResult);
+        if(is_null($getClientTokenResult[0])){
+            return $this->buildErrorMessage($getClientTokenResult);
         }
-        $accessToken = $getAccessTokenResult[0];
+        $clientToken = $getClientTokenResult[0];
         // query参数不为空
         if(!empty($query)){
             $url .= (stripos($url, '?') !== false ? '&' : '?') . http_build_query($query);
@@ -282,11 +283,7 @@ abstract class Base implements HandlerInterface
         // 请求头
         $requestHeaders = $headers;
         // 追加接口调用凭证
-        $requestHeaders['access-token'] = $accessToken;
-        // 转换为JSON
-        if ($json){
-            $requestHeader['Content-Type'] = 'application/json';
-        }
+        $requestHeaders['access-token'] = $clientToken;
         // 获取请求结果
         $response = HttpClient::get($requestUrl, $headers)->body;
         
@@ -295,16 +292,16 @@ abstract class Base implements HandlerInterface
         // 失败
         if(is_null($parseResponseDataResult[0])){
             // 如果接口调用凭证未标记为无效，且返回码为凭证无效则重试一次
-            if(false === $this->accessTokenInvalid && in_array($parseResponseDataResult[1]->getCode(), $this->accessTokenInvalidCode)){
+            if(false === $this->clientTokenInvalid && in_array($parseResponseDataResult[1]->getCode(), $this->clientTokenInvalidCode)){
                 // 标记调用凭证无效
-                $this->invalidAccessToken();
+                $this->invalidClientToken();
                 // 重试一次
                 return $this->callGetApi($url, $headers);
             }
         }
         // 请求成功且当前当前调用凭证标记的是无效
-        if(false !== $this->accessTokenInvalid){
-            $this->accessTokenInvalid = false;
+        if(false !== $this->clientTokenInvalid){
+            $this->clientTokenInvalid = false;
         }
         // 返回
         return $this->buildErrorMessage($parseResponseDataResult);
@@ -322,21 +319,21 @@ abstract class Base implements HandlerInterface
     public function callPostApi($url, array $data = [], array $headers = [], $json = true)
     {
         // 获取接口调用凭证
-        $getAccessTokenResult = $this->getAccessToken();
+        $getClientTokenResult = $this->getClientToken();
         // 获取接口调用凭证失败
-        if(is_null($getAccessTokenResult[0])){
-            return $this->buildErrorMessage($getAccessTokenResult);
+        if(is_null($getClientTokenResult[0])){
+            return $this->buildErrorMessage($getClientTokenResult);
         }
-        $accessToken = $getAccessTokenResult[0];
+        $clientToken = $getClientTokenResult[0];
         // 请求体
         $requestData = $data;
         // 请求头
         $requestHeaders = $headers;
         // 追加接口调用凭证
-        $requestHeaders['access-token'] = $accessToken;
+        $requestHeaders['access-token'] = $clientToken;
         // 转换为JSON
         if ($json){
-            $requestHeader['Content-Type'] = 'application/json';
+            $requestHeader['content-type'] = 'application/json';
             $requestData = Tools::arr2json($requestData);
         }
         // 获取请求结果
@@ -346,61 +343,16 @@ abstract class Base implements HandlerInterface
         // 失败
         if(is_null($parseResponseDataResult[0])){
             // 如果接口调用凭证未标记为无效，且返回码为凭证无效则重试一次
-            if(false === $this->accessTokenInvalid && in_array($parseResponseDataResult[1]->getCode(), $this->accessTokenInvalidCode)){
+            if(false === $this->clientTokenInvalid && in_array($parseResponseDataResult[1]->getCode(), $this->clientTokenInvalidCode)){
                 // 标记调用凭证无效
-                $this->invalidAccessToken();
+                $this->invalidClientToken();
                 // 重试一次
                 return $this->callPostApi($url, $data, $headers, $json);
             }
         }
         // 请求成功且当前当前调用凭证标记的是无效
-        if(false !== $this->accessTokenInvalid){
-            $this->accessTokenInvalid = false;
-        }
-        // 返回
-        return $this->buildErrorMessage($parseResponseDataResult);
-    }
-
-    /**
-     * 接口通用表单类型POST请求方法
-     * @access public
-     * @param string $url 接口URL
-     * @param array $fields 字段
-     * @param string $name 名称
-     * @param string $fileName 上传文件名
-     * @param string $fileBody 上传文件内容
-     * @param string $mimeType MIME类型
-     * @param array $headers 请求头
-     * @return array
-     */
-    public function callMultipartPostApi($url, array $fields, $name, $fileName, $fileBody, $mimeType = null, array $headers = [])
-    {
-        // 获取接口调用凭证
-        $getAccessTokenResult = $this->getAccessToken();
-        // 获取接口调用凭证失败
-        if(is_null($getAccessTokenResult[0])){
-            return $this->buildErrorMessage($getAccessTokenResult);
-        }
-        $accessToken = $getAccessTokenResult[0];
-        // 替换URL中的参数
-        $requestUrl = str_replace('=ACCESS_TOKEN', '=' . urlencode($accessToken), $url);
-        // 获取请求结果
-        $response = HttpClient::multipartPost($requestUrl, $fields, $name, $fileName, $fileBody, $mimeType, $headers)->body;
-        // 获取解析结果
-        $parseResponseDataResult = $this->parseResponseData($response);
-        // 失败
-        if(is_null($parseResponseDataResult[0])){
-            // 如果接口调用凭证未标记为无效，且返回码为凭证无效则重试一次
-            if(false === $this->accessTokenInvalid && in_array($parseResponseDataResult[1]->getCode(), $this->accessTokenInvalidCode)){
-                // 标记调用凭证无效
-                $this->invalidAccessToken();
-                // 重试一次
-                return $this->callMultipartPostApi($url, $fields, $name, $fileName, $fileBody, $mimeType, $headers);
-            }
-        }
-        // 请求成功且当前当前调用凭证标记的是无效
-        if(false !== $this->accessTokenInvalid){
-            $this->accessTokenInvalid = false;
+        if(false !== $this->clientTokenInvalid){
+            $this->clientTokenInvalid = false;
         }
         // 返回
         return $this->buildErrorMessage($parseResponseDataResult);
@@ -475,12 +427,12 @@ abstract class Base implements HandlerInterface
      * @access protected
      * @return string
      */
-    abstract protected function getAccessCacheKey();
+    abstract protected function getClientCacheKey();
 
     /**
      * 强制重新获取接口调用凭证
      * @access protected
      * @return array
      */
-    abstract protected function getAccessTokenForce();
+    abstract protected function getClientTokenFromOnline();
 }

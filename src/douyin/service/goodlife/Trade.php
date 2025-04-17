@@ -11,12 +11,10 @@
 
 namespace think\douyin\service\goodlife;
 
-use think\douyin\Service;
-
 /**
  * 抖音交易服务
  */
-class Trade extends Service
+class Trade extends Base
 {
     /**
      * 通讯录单个搜索

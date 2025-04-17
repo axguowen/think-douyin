@@ -11,77 +11,74 @@
 
 namespace think\douyin\service\mobileweb;
 
-use think\douyin\Service;
-use think\douyin\utils\Tools;
-use axguowen\HttpClient;
-
 /**
  * 即时聊天
  */
-class Im extends Service
+class Im extends Base
 {
     /**
-     * 回复私信
+     * 发送私信
      * @access public
-     * @param string $openId 用户的唯一标识
+     * @scope im.direct_message
+     * @param string $accessToken oauth授权用户的access_token
+     * @param string $openId 用户唯一标识
+     * @param string $toUserId 消息的接收方open_id
      * @param string $msgId
      * @param string $conversationId
-     * @param string $toUserId 消息的接收方open_id
      * @param array $content
+     * @param string $scene
      * @return array
      */
-    public function replyMsg($openId, $msgId, $conversationId, $toUserId, array $content)
+    public function sendMsg($accessToken, $openId, $toUserId, $msgId, $conversationId, array $content, $scene = '')
     {
-        // oauth凭证
-        $accessToken = $this->handler->getConfig('oauth_access_token');
+        // 请求地址
+        $url = 'https://open.douyin.com/im/send/msg/?open_id=' . $openId;
+        // 如果场景值为空
+        if(empty($scene)) {
+            $scene = 'im_reply_msg';
+        }
         // 请求体
-        $data = Tools::arr2json([
+        $data = [
             'msg_id' => $msgId,
             'conversation_id' => $conversationId,
             'to_user_id' => $toUserId,
             'content' => $content,
-        ]);
+            'scene' => $scene,
+        ];
         // 请求头
         $header = [
-            'Content-Type' => 'application/json',
             'access_token' => $accessToken,
         ];
-        $requestUrl = 'https://open.douyin.com/im/send/msg/?open_id=' . $openId;
-        // 获取请求结果
-        $response = HttpClient::post($requestUrl, $data, $header)->body;
-        // 返回结果
-        return $this->handler->parseResponseData($response);
+        // 返回
+        return $this->callPostApi($url, $data, $header);
     }
 
     /**
      * 撤回私信
      * @access public
-     * @param string $openId 用户的唯一标识
+     * @scope im.recall_message
+     * @param string $accessToken oauth授权用户的access_token
+     * @param string $openId 用户唯一标识
      * @param string $msgId
      * @param string $conversationId
      * @param string $conversationType
-     * @param array $content
      * @return array
      */
-    public function recallMsg($openId, $msgId, $conversationId, $conversationType)
+    public function recallMsg($accessToken, $openId, $msgId, $conversationId, $conversationType = 1)
     {
-        // oauth凭证
-        $accessToken = $this->handler->getConfig('oauth_access_token');
+        // 请求地址
+        $url = 'https://open.douyin.com/im/recall/msg/?open_id=' . $openId;
         // 请求体
-        $data = Tools::arr2json([
+        $data = [
             'msg_id' => $msgId,
             'conversation_id' => $conversationId,
             'conversation_type' => $conversationType,
-        ]);
+        ];
         // 请求头
         $header = [
-            'Content-Type' => 'application/json',
             'access_token' => $accessToken,
         ];
-        $requestUrl = 'https://open.douyin.com/im/recall/msg/?open_id=' . $openId;
-        // 获取请求结果
-        $response = HttpClient::post($requestUrl, $data, $header)->body;
-        // 返回结果
-        return $this->handler->parseResponseData($response);
+        // 返回
+        return $this->callPostApi($url, $data, $header);
     }
 }

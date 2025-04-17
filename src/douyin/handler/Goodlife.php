@@ -25,9 +25,9 @@ class Goodlife extends Base
      */
     protected $options = [
         // 应用ID
-        'client_key' => '',
+        'app_id' => '',
         // 应用密钥
-        'client_secret' => '',
+        'app_secret' => '',
     ];
 
     /**
@@ -41,9 +41,9 @@ class Goodlife extends Base
      * @access protected
      * @return string
      */
-    protected function getAccessCacheKey()
+    protected function getClientTokenCacheKey()
     {
-        return 'douyin_goodlife_access_token_' . $this->options['client_key'];
+        return 'douyin_goodlife_client_token_' . $this->options['app_id'];
     }
 
     /**
@@ -51,14 +51,14 @@ class Goodlife extends Base
      * @access protected
      * @return array
      */
-    protected function getAccessTokenForce()
+    protected function getClientTokenFromOnline()
     {
         // 接口请求地址
         $requestUrl = 'https://open.douyin.com/oauth/client_token/';
         // 参数
         $data = Tools::arr2json([
-            'client_key' => $this->options['client_key'],
-            'client_secret' => $this->options['client_secret'],
+            'client_key' => $this->options['app_id'],
+            'client_secret' => $this->options['app_secret'],
             'grant_type' => 'client_credential',
         ]);
         // 请求头
@@ -73,11 +73,64 @@ class Goodlife extends Base
         if(is_null($parseResponseResult[0])){
             return $parseResponseResult;
         }
-        $accessTokenData = $parseResponseResult[0];
+        $clientTokenData = $parseResponseResult[0];
         // 返回
         return [[
-            'access_token' => $accessTokenData['access_token'],
-            'expires_in' => $accessTokenData['expires_in'],
+            'client_token' => $clientTokenData['access_token'],
+            'expires_in' => $clientTokenData['expires_in'],
         ], null];
+    }
+
+    /**
+     * 获取通知数据
+     * @access public
+     * @param string $sign 签名
+     * @param string $inputStr input请求数据
+     * @return array
+     */
+    public function getNotifyData($sign, $inputStr)
+    {
+        // 获取当前密钥
+        $clientSecret = $this->options['app_secret'];
+        // 验签
+        if (Tools::sign($clientSecret, $inputStr) !== $sign) {
+            // 返回
+            return [null, new \Exception('签名错误')];
+        }
+        // 签名正确
+        $notifyData = json_decode($inputStr, true);
+        // 失败
+        if(!is_array($notifyData)){
+            return [null, new \Exception('数据格式错误')];
+        }
+        // 返回
+        return [$notifyData, null];
+    }
+
+    /**
+     * 获取服务商通知数据
+     * @access public
+     * @param string $sign 签名
+     * @param string $inputStr input请求数据
+     * @param array $httpQuery
+     * @return array
+     */
+    public function getServiceNotifyData($sign, $inputStr, array $httpQuery = [])
+    {
+        // 获取当前密钥
+        $clientSecret = $this->options['app_secret'];
+        // 验签
+        if (Tools::spiSign($clientSecret, $inputStr, $httpQuery) !== $sign) {
+            // 返回
+            return [null, new \Exception('签名错误')];
+        }
+        // 签名正确
+        $notifyData = json_decode($inputStr, true);
+        // 失败
+        if(!is_array($notifyData)){
+            return [null, new \Exception('数据格式错误')];
+        }
+        // 返回
+        return [$notifyData, null];
     }
 }

@@ -19,9 +19,9 @@ return [
             // 驱动类型
             'type' => 'Goodlife',
             // 应用ID
-            'client_key' => '',
+            'app_key' => '',
             // 应用密钥
-            'client_secret' => '',
+            'app_secret' => '',
         ],
         // 移动网站应用
         'mobileweb' => [
@@ -31,10 +31,6 @@ return [
             'client_key' => '',
             // 应用密钥
             'client_secret' => '',
-            // oauth授权Token
-            'oauth_access_token' => '',
-            // oauth刷新Token
-            'oauth_refresh_token' => '',
         ],
     ],
 ];
