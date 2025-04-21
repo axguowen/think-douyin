@@ -12,7 +12,7 @@
 namespace think\douyin\service\mobileweb;
 
 /**
- * 即时聊天
+ * 私信群聊能力
  */
 class Im extends Base
 {
@@ -73,6 +73,33 @@ class Im extends Base
             'msg_id' => $msgId,
             'conversation_id' => $conversationId,
             'conversation_type' => $conversationType,
+        ];
+        // 请求头
+        $header = [
+            'access_token' => $accessToken,
+        ];
+        // 返回
+        return $this->callPostApi($url, $data, $header);
+    }
+
+    /**
+     * 查询授权主动私信用户
+     * @access public
+     * @scope im.direct_message
+     * @param string $accessToken oauth授权用户的access_token
+     * @param string $openId 用户唯一标识
+     * @param int $pageNum
+     * @param int $pageSize
+     * @return array
+     */
+    public function authorizeUserList($accessToken, $openId, $pageNum, $pageSize = 10)
+    {
+        // 请求地址
+        $url = 'https://open.douyin.com/im/authorize/user_list/?open_id=' . $openId;
+        // 请求体
+        $data = [
+            'page_num' => $pageNum,
+            'page_size' => $pageSize,
         ];
         // 请求头
         $header = [
