@@ -241,8 +241,10 @@ class Tools
         if(!empty($httpQuery)) {
             // 按字典升序排序
             ksort($httpQuery);
-            // 拼接参数
-            $signStr .= '&' . http_build_query($httpQuery);
+            foreach ($httpQuery as $key => $value) {
+                // 拼接参数
+                $signStr .= '&' . $key . '=' . $value;
+            }
         }
         // 如果body参数不为空
         if(!empty($httpBody)) {
