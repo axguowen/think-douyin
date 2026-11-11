@@ -285,7 +285,7 @@ abstract class Base implements HandlerInterface
         // 追加接口调用凭证
         $requestHeaders['access-token'] = $clientToken;
         // 获取请求结果
-        $response = HttpClient::get($requestUrl, $headers)->body;
+        $response = HttpClient::get($url, $requestHeaders)->body;
         
         // 获取解析结果
         $parseResponseDataResult = $this->parseResponseData($response);
